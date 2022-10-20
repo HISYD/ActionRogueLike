@@ -30,7 +30,7 @@ protected:
 	USpringArmComponent* SpringArmComp; 
 
 	void MoveForward(float value);
-
+	void MoveRight(float value);
 
 
 
