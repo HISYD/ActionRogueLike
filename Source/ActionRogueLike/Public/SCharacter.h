@@ -7,7 +7,7 @@
 #include "SCharacter.generated.h"
 
 
-//手动声明这两个类的目的是什么
+//手动声明指针是啥，只是为了帮助理解
 class UCameraComponent;
 class USpringArmComponent;
 
@@ -17,9 +17,15 @@ class ACTIONROGUELIKE_API ASCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
+protected:
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<AActor> ProjectileClass;//[PrimaryAttack函数]提供了一个参数，可以去挂载某个class，让actor可以识别调用某个类，常用于投射物伤害类型等
+	//其实也可以用UClass*,但是这个是一个类型安全的模板
+
 public:
 	// Sets default values for this character's properties
 	ASCharacter();
+
 
 protected:
 
@@ -31,14 +37,13 @@ protected:
 
 	void MoveForward(float value);
 	void MoveRight(float value);
+	//void Jump(float value);
+	void PrimaryAttack();
 
 
-
-	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 public:	
-	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
 	// Called to bind functionality to input
