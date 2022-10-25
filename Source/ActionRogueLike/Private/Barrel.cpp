@@ -22,8 +22,7 @@ ABarrel::ABarrel()
 	ForceComp = CreateDefaultSubobject<URadialForceComponent>("Radial Force");
 	ForceComp->SetupAttachment(MeshComp);
 	
-
-
+	
 
 
 	// Leaving this on applies small constant force via component 'tick' (Optional)
@@ -31,13 +30,12 @@ ABarrel::ABarrel()
 
 	ForceComp->Radius = 750.0f;
 	ForceComp->ImpulseStrength = 2500.0f; // Alternative: 200000.0 if bImpulseVelChange = false
-	// Optional, ignores 'Mass' of other objects (if false, the impulse strength will be much higher to push most objects depending on Mass)
-	ForceComp->bImpulseVelChange = true;
+	ForceComp->bImpulseVelChange = true;//可选，不知道干啥，好像不开会根据mass计算冲击波威力大很多
+	ForceComp->AddCollisionChannelToAffect(ECC_WorldDynamic);//可选，手动设置Collision影响的范围，默认的是不会影响worlddynamic通道的
 
-	// Optional, default constructor of component already adds 4 object types to affect, excluding WorldDynamic
-	ForceComp->AddCollisionChannelToAffect(ECC_WorldDynamic);
 
-	// Binding either in constructor or in PostInitializeComponents() below
+	// 再刚构造的时候，或者后初始化阶段，做绑定都是可以的，将 爆炸任务函数 作为一个动态绑定在MeshComp的OnComponentHit上
+	// 放在构造器里比override PostInitializeComponents()好理解多，并且剩下一个在.h里面声明virtual void PostInitializeComponents() override的功夫
 	//MeshComp->OnComponentHit.AddDynamic(this, &ASExplosiveBarrel::OnActorHit);
 }
 
@@ -63,7 +61,7 @@ void ABarrel::PostInitializeComponents()
 }
 
 
-//void ABarrel::OnActorHit()
+//爆炸任务函数
 void ABarrel::OnActorHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
 	ForceComp->FireImpulse();

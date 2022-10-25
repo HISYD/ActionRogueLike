@@ -26,7 +26,7 @@ public:
 
 protected:
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	USphereComponent* SphereComp;
 
 	UPROPERTY(VisibleAnywhere)
@@ -34,8 +34,8 @@ protected:
 
 	UPROPERTY(VisibleAnywhere)
 	UParticleSystemComponent* EffectComp;
-
-
+	UPROPERTY(VisibleAnywhere)
+	UParticleSystemComponent* EffectTrailComp;
 
 
 

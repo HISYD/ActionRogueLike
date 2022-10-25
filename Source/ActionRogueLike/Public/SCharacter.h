@@ -10,7 +10,8 @@
 //手动声明指针是啥，只是为了帮助理解
 class UCameraComponent;
 class USpringArmComponent;
-
+class USInteractionComponent;
+class UAnimMontage;
 
 UCLASS()
 class ACTIONROGUELIKE_API ASCharacter : public ACharacter
@@ -18,10 +19,14 @@ class ACTIONROGUELIKE_API ASCharacter : public ACharacter
 	GENERATED_BODY()
 
 protected:
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="Attack")
 	TSubclassOf<AActor> ProjectileClass;//[PrimaryAttack函数]提供了一个参数，可以去挂载某个class，让actor可以识别调用某个类，常用于投射物伤害类型等
 	//其实也可以用UClass*,但是这个是一个类型安全的模板
 
+	UPROPERTY(EditAnywhere, Category="Attack")
+	UAnimMontage* AttackAnim;//如果用TSubclassOf<>模板反而会报错
+
+	FTimerHandle TimerHandle_PrimaryAttack;//为攻击动画提供的计时句柄
 public:
 	// Sets default values for this character's properties
 	ASCharacter();
@@ -34,13 +39,16 @@ protected:
 
 	UPROPERTY(VisibleAnywhere)
 	USpringArmComponent* SpringArmComp; 
-
+	
+	UPROPERTY(VisibleAnywhere)
+	USInteractionComponent* InteractionComp; 
+	
+	
 	void MoveForward(float value);
 	void MoveRight(float value);
-	//void Jump(float value);
 	void PrimaryAttack();
-
-
+	void PrimaryAttack_TimeElapsed();
+	void PrimaryInteract();
 	virtual void BeginPlay() override;
 
 public:	

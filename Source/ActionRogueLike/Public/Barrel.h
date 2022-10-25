@@ -35,8 +35,9 @@ protected:
 
 
 	// Must be marked with ufunction in order to 'bind' the event
+	//[]具体为什么是这些参数可以直接去看函数签名，它是绑定在OnComponentHit上的，对应的签名是这么定义的，u++的宏写的看起来很累
 	UFUNCTION()
-	void OnActorHit();
+	void OnActorHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 
 
 public:	
