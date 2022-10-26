@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "SAttributeComponent.h"
 #include "GameFramework/Character.h"
 #include "SCharacter.generated.h"
 
@@ -12,6 +13,7 @@ class UCameraComponent;
 class USpringArmComponent;
 class USInteractionComponent;
 class UAnimMontage;
+class USAttributeComponent;
 
 UCLASS()
 class ACTIONROGUELIKE_API ASCharacter : public ACharacter
@@ -26,7 +28,16 @@ protected:
 	UPROPERTY(EditAnywhere, Category="Attack")
 	UAnimMontage* AttackAnim;//如果用TSubclassOf<>模板反而会报错
 
-	FTimerHandle TimerHandle_PrimaryAttack;//为攻击动画提供的计时句柄
+	UPROPERTY(EditAnywhere, Category="Dash")
+	TSubclassOf<AActor> DashProjectile;
+	UPROPERTY(EditAnywhere, Category="Dash")
+	UAnimMontage* DashAnim;
+	
+	FTimerHandle TimerHandle_PrimaryAttack, TimerHandle_PrimaryDash;//为攻击动画提供的计时句柄
+
+
+
+	
 public:
 	// Sets default values for this character's properties
 	ASCharacter();
@@ -41,13 +52,18 @@ protected:
 	USpringArmComponent* SpringArmComp; 
 	
 	UPROPERTY(VisibleAnywhere)
-	USInteractionComponent* InteractionComp; 
+	USInteractionComponent* InteractionComp;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	USAttributeComponent* AttributeComp;
 	
 	
 	void MoveForward(float value);
 	void MoveRight(float value);
 	void PrimaryAttack();
 	void PrimaryAttack_TimeElapsed();
+	void PrimaryDash();
+	void PrimaryDash_TimeElapsed();
 	void PrimaryInteract();
 	virtual void BeginPlay() override;
 

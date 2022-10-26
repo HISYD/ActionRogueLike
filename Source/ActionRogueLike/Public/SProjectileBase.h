@@ -24,6 +24,9 @@ public:
 protected:
 
 	virtual void BeginPlay() override;
+	virtual void PostInitializeComponents() override;
+	virtual void Tick(float DeltaTime) override;
+
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	USphereComponent* SphereComp;
@@ -37,11 +40,11 @@ protected:
 	
 	UPROPERTY(VisibleAnywhere)
 	UProjectileMovementComponent* MoveComp;
-
-	//virtual void PostInitializeComponents() override;
-
-public:	
-
-	virtual void Tick(float DeltaTime) override;
-	void OnHitSpawnEffect(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
+	
+	UFUNCTION()//必须声明，如果需要绑定的话
+	virtual void OnActorHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);//声明为virtual，未来可能要修改hit的调用内容
+	
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	void Explode();
+	
 };

@@ -21,7 +21,6 @@ ASCharacter::ASCharacter()
 	SpringArmComp->SetupAttachment(RootComponent);
 	CameraComp = CreateDefaultSubobject<UCameraComponent>("CameraComp");
 	CameraComp->SetupAttachment(SpringArmComp);
-
 	//ĞŞ¸ÄcharacterµÄyaw¿É¿ØĞÔÄ¬ÈÏÖµ£¬ÉèÖÃspringarmµÄµ¥¶ÀĞı×ª¿ØÖÆ
 	bUseControllerRotationYaw = false;//±ÜÃâÓÀÔ¶±³¶Ô
 	SpringArmComp->bUsePawnControlRotation = true;//µ¥¶ÀÔÊĞí×Ó×é¼ş£¨spring£©µ¥¶ÀÖ§³Ö¿ØÖÆ
@@ -33,7 +32,7 @@ ASCharacter::ASCharacter()
 
 	//½»»¥µÄcomp
 	InteractionComp = CreateDefaultSubobject<USInteractionComponent>(TEXT("InteractionComp"));
-	
+	AttributeComp   = CreateDefaultSubobject<USAttributeComponent>(TEXT("AttributeComp"));
 }
 
 
@@ -72,7 +71,8 @@ void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
 
 	//PlayerInputComponent->BindAction("PrimaryInteract", IE_Pressed, this, &InteractionComp->PrimaryInteract);//´íÎóµÄÓï¾ä£¬Ö»ÔÊĞí°ó¶¨½ÇÉ«×ÔÉíµÄº¯Êı
-	PlayerInputComponent->BindAction("PrimaryInteract", IE_Pressed, this, &ASCharacter::PrimaryInteract);//´íÎóµÄÓï¾ä£¬Ö»ÔÊĞí°ó¶¨½ÇÉ«×ÔÉíµÄº¯Êı
+	PlayerInputComponent->BindAction("PrimaryInteract", IE_Pressed, this, &ASCharacter::PrimaryInteract);
+	PlayerInputComponent->BindAction("PrimaryDash", IE_Pressed, this, &ASCharacter::PrimaryDash);
 	
 }
 
@@ -115,7 +115,6 @@ void ASCharacter::PrimaryAttack()//¹¥»÷º¯Êı£¬²¥·Å¹¥»÷¶¯»­£¬²¢ÇÒ¼ÆÊ±£¬ÔÚÕıÈ·Ê±¼äµ
 	PlayAnimMontage(AttackAnim);//²¥·Å»ÓÊÖ¶¯»­£¬
 	GetWorldTimerManager().SetTimer(TimerHandle_PrimaryAttack, this, &ASCharacter::PrimaryAttack_TimeElapsed, 0.2f);//Ê¹ÓÃÖ¸¶¨¾ä±ú¼ÆÊ±£¬ÑÓ³Ù0.2Ãë£¬µÈ´ıÊÖ²¿¶¯»­ÔË¶¯µ½ÕıÈ·Î»ÖÃ²Åºó´¥·¢Õæ¹¥»÷º¯Êı
 }
-
 void ASCharacter::PrimaryAttack_TimeElapsed()//ÕæÕıµÄ¹¥»÷º¯Êı£¬Ê©·ÅÄ§·¨
 {
 	FVector HandLocation = GetMesh()->GetSocketLocation("Muzzle_01");
@@ -146,7 +145,35 @@ void ASCharacter::PrimaryAttack_TimeElapsed()//ÕæÕıµÄ¹¥»÷º¯Êı£¬Ê©·ÅÄ§·¨
 	GetWorld()->SpawnActor<AActor>(ProjectileClass, SpawnTM, SpawnParams);//<AActor>(Àà£¬±ä»»¾ØÕó£¬²ÎÊı),ÏÈ´òÕâ¸öÖ÷º¯Êı£¬ÔÙ¸ù¾İĞèÒªµÄ²ÎÊı·´ÍÆ
 }
 
+void ASCharacter::PrimaryDash()
+{
+	PlayAnimMontage(DashAnim);
+	GetWorldTimerManager().SetTimer(TimerHandle_PrimaryDash, this, &ASCharacter::PrimaryDash_TimeElapsed, 0.2f);
+	
+}
+void ASCharacter::PrimaryDash_TimeElapsed()
+{
+	FVector HandLocation = GetMesh()->GetSocketLocation("Muzzle_01");
+	
+	//FTransform SpawnTM = FTransform(GetControlRotation(), HandLocation);
+	
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;//×Ô¼ºf12½øÈ¥¿´
+	SpawnParams.Instigator = this;//ÕâĞ©²ÎÊı»áËÍ¸øspawnµÄ¶ÔÏó£¬ÕâÑùÎÒÃÇ¾Í¿ÉÒÔÔÚspawnµÄÄÚÈİ£¨¹¥»÷Ä§·¨£©ÖĞ·ÃÎÊÊÍ·ÅÕßĞÅÏ¢£¬ºóĞø½Ì³ÌÊÇÍ¨¹ıÕâÖÖ·½Ê½ÔÚÀ¶Í¼ÀïÃæ×ö³öÊÍ·ÅÕßÅö×²»íÃâ
 
+	FRotator CameraRotator = CameraComp->GetComponentRotation();
+	FVector CameraBegin = CameraComp->GetComponentLocation();
+	FVector CameraEnd   = CameraBegin + 2000 * CameraRotator.Vector();
+	
+	FHitResult CameraHitResult;
+	GetWorld()->LineTraceSingleByChannel(CameraHitResult, CameraBegin, CameraEnd, ECollisionChannel::ECC_Camera);
+	FVector DesiredLocation = CameraHitResult.IsValidBlockingHit() ? CameraHitResult.Location : CameraEnd;
+	FRotator DesiredRotator = (DesiredLocation - HandLocation).Rotation();//ÂèµÄ£¬ÇóÁ½¸öÏòÁ¿±ä»»¹ıÈ¥µÄÅ·À­½ÇÕâÃ´Çó£¬Ç°ÃæÀí½â´íÁËÒ»Ö±ÔÚÓÃlookat
+	FTransform SpawnTM = FTransform(DesiredRotator, HandLocation);
+
+
+	GetWorld()->SpawnActor<AActor>(DashProjectile, SpawnTM, SpawnParams);//<AActor>(Àà£¬±ä»»¾ØÕó£¬²ÎÊı),ÏÈ´òÕâ¸öÖ÷º¯Êı£¬ÔÙ¸ù¾İĞèÒªµÄ²ÎÊı·´ÍÆ
+}
 
 
 void ASCharacter::PrimaryInteract()
