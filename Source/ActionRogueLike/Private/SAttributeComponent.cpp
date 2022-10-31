@@ -13,4 +13,10 @@ USAttributeComponent::USAttributeComponent()
 void USAttributeComponent::UpdateHealth(int delta)
 {
 	Health += delta;
+	OnHealthChanged.Broadcast(nullptr, this, Health, delta);
+}
+
+bool USAttributeComponent::IsAlive() const
+{
+	return Health > 0.0f;
 }

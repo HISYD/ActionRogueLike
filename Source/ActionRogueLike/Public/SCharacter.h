@@ -67,6 +67,11 @@ protected:
 	void PrimaryInteract();
 	virtual void BeginPlay() override;
 
+	virtual void PostInitializeComponents() override;
+
+	UFUNCTION()
+	void CheckIfDead(AActor* InstigatorActor, USAttributeComponent* OwningComp, float NewHealth, float Delta);
+
 public:	
 	virtual void Tick(float DeltaTime) override;
 

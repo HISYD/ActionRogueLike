@@ -76,6 +76,12 @@ void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	
 }
 
+void ASCharacter::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+	AttributeComp->OnHealthChanged.AddDynamic(this, &ASCharacter::CheckIfDead);
+}
+
 
 
 
@@ -181,5 +187,14 @@ void ASCharacter::PrimaryInteract()
 	if(InteractionComp)//保险起见的写法
 	{
 		InteractionComp->PrimaryInteract();
+	}
+}
+
+void ASCharacter::CheckIfDead(AActor* InstigatorActor, USAttributeComponent* OwningComp, float NewHealth, float Delta)
+{
+	if(NewHealth < 0.0f && Delta < 0.0f)
+	{
+		APlayerController* PC = Cast<APlayerController>(GetController());
+		DisableInput(PC);
 	}
 }

@@ -20,7 +20,10 @@ void ASAttackProjectile::OnActorOverlap(UPrimitiveComponent* OverlappedComponent
 	if (OtherActor)
 	{
 		USAttributeComponent* AttributeComponent = Cast<USAttributeComponent>(OtherActor->GetComponentByClass(USAttributeComponent::StaticClass()));
-		AttributeComponent->UpdateHealth(-5);
-		Destroy();
+		if(ensure(AttributeComponent))
+		{
+			AttributeComponent->UpdateHealth(-20);
+			Destroy();
+		}
 	}
 }
