@@ -10,11 +10,15 @@
 /**
  * 
  */
+
+
+
 UCLASS()
 class ACTIONROGUELIKE_API ASAttackProjectile : public ASProjectileBase
 {
 	GENERATED_BODY()
 
+	
 	UFUNCTION()
 	void OnActorOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
 	

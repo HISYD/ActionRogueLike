@@ -9,6 +9,7 @@
 class USphereComponent;
 class UParticleSystemComponent;
 class UProjectileMovementComponent;
+class UAudioComponent;
 
 UCLASS()
 class ACTIONROGUELIKE_API ASProjectileBase : public AActor
@@ -37,6 +38,13 @@ protected:
 	
 	UPROPERTY(EditAnywhere)
 	UParticleSystem* HitEffect;
+
+	UPROPERTY(VisibleAnywhere)
+	UAudioComponent* AudioComp;
+	UPROPERTY(EditAnywhere)
+	USoundBase* HitSound;
+
+	
 	
 	UPROPERTY(VisibleAnywhere)
 	UProjectileMovementComponent* MoveComp;

@@ -4,6 +4,7 @@
 #include "SProjectileBase.h"
 
 #include "DrawDebugHelpers.h"
+#include "Components/AudioComponent.h"
 #include "Components/SphereComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -31,6 +32,8 @@ ASProjectileBase::ASProjectileBase()
 	MoveComp->ProjectileGravityScale = 0.0f;
 	MoveComp->bRotationFollowsVelocity = true;
 	MoveComp->bInitialVelocityInLocalSpace = true;
+
+	AudioComp = CreateDefaultSubobject<UAudioComponent>(TEXT("AudioComp"));
 	
 }
 
@@ -70,6 +73,7 @@ void ASProjectileBase::Explode_Implementation()
 	{
 		//worldcontext object 是什么
         UGameplayStatics::SpawnEmitterAtLocation(this, HitEffect, GetActorLocation(), GetActorRotation());
+		UGameplayStatics::PlaySoundAtLocation(this, HitSound, GetActorLocation(), GetActorRotation());
 		Destroy();
 	}
 	
