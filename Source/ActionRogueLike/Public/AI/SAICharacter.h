@@ -26,14 +26,15 @@ protected:
 	UPROPERTY(VisibleAnywhere)
 	UPawnSensingComponent* SenseComp;
 	
+	FName TimeToHitParamName;
 	
 	virtual void BeginPlay() override;
-	
-	UFUNCTION(BlueprintCallable)
-	void CheckIfDead(AActor* InstigatorActor, USAttributeComponent* OwningComp, float NewHealth, float Delta);
 
 	UFUNCTION()
 	void DoOnSeePawn(APawn* Pawn);
+
+	UFUNCTION()
+	void DoOnHealthChange(AActor* InstigatorActor, USAttributeComponent* OwningComp, float NewHealth, float Delta);
 	
 	virtual void PostInitializeComponents() override;
 	

@@ -39,7 +39,7 @@ void ASGameModeBase::DoOnQeuryFinish(UEnvQueryInstanceBlueprintWrapper* QueryIns
 
 	//每次试图创建的时候执行，遍历检查；目前的Enemy数量
 	int32 NrOfAliveBots = 0;
-	for (TActorIterator<ASAICharacter> It(GetWorld()); It; ++It)
+	for (TActorIterator<ASAICharacter> It(GetWorld()); It; ++It)//一种好用的迭代器，返回所有继承自该基类的子类的实例
 	{
 		ASAICharacter* Bot = *It;
 		USAttributeComponent* AttribComp = Cast<USAttributeComponent>(Bot->GetComponentByClass(USAttributeComponent::StaticClass()));
