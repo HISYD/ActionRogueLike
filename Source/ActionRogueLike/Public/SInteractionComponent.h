@@ -21,3 +21,4 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	void PrimaryInteract();//其实可以在Character中去定义的，只是为了解耦分离在这里
 };
+  

@@ -22,7 +22,7 @@ void ASAttackProjectile::OnActorOverlap(UPrimitiveComponent* OverlappedComponent
 		USAttributeComponent* AttributeComponent = Cast<USAttributeComponent>(OtherActor->GetComponentByClass(USAttributeComponent::StaticClass()));
 		if(ensure(AttributeComponent))
 		{
-			AttributeComponent->UpdateHealth(-20);
+			AttributeComponent->UpdateHealth(-2);
 			Destroy();
 		}
 	}

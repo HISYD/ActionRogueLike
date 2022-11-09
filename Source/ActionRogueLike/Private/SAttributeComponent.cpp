@@ -7,7 +7,7 @@
 USAttributeComponent::USAttributeComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
-	Health = 100;
+	Health = 100.0f;
 }
 
 void USAttributeComponent::UpdateHealth(int delta)

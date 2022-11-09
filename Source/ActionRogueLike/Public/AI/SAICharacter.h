@@ -3,8 +3,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "SAttributeComponent.h"
 #include "GameFramework/Character.h"
 #include "SAICharacter.generated.h"
+
+class USAttributeComponent;
+class UPawnSensingComponent;
 
 UCLASS()
 class ACTIONROGUELIKE_API ASAICharacter : public ACharacter
@@ -16,14 +20,30 @@ public:
 	ASAICharacter();
 
 protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
 
+	UPROPERTY(VisibleAnywhere)
+	USAttributeComponent* AttribComp;
+	UPROPERTY(VisibleAnywhere)
+	UPawnSensingComponent* SenseComp;
+	
+	
+	virtual void BeginPlay() override;
+	
+	UFUNCTION(BlueprintCallable)
+	void CheckIfDead(AActor* InstigatorActor, USAttributeComponent* OwningComp, float NewHealth, float Delta);
+
+	UFUNCTION()
+	void DoOnSeePawn(APawn* Pawn);
+	
+	virtual void PostInitializeComponents() override;
+	
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	
 
 };

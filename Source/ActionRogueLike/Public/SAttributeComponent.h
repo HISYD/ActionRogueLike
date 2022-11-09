@@ -31,14 +31,16 @@ class ACTIONROGUELIKE_API USAttributeComponent : public UActorComponent
 
 protected:
 	
-	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly)
-	float Health;
+	
 
 	
 public:	
 	// Sets default values for this component's properties
 	USAttributeComponent();
 
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly)
+	float Health;
+	
 	UFUNCTION(BlueprintCallable)
 	void UpdateHealth(int delta);
 	
