@@ -6,7 +6,9 @@
 #include "AIController.h"
 #include "BrainComponent.h"
 #include "DrawDebugHelpers.h"
+#include "SWorldUserWidget.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "Blueprint/UserWidget.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Perception/PawnSensingComponent.h"
 
@@ -61,7 +63,20 @@ void ASAICharacter::DoOnSeePawn(APawn* Pawn)
 }
 
 void ASAICharacter::DoOnHealthChange(AActor* InstigatorActor, USAttributeComponent* OwningComp, float NewHealth, float Delta)//击杀布娃娃效果的实现，注意要在ProjectSetting中设置启用碰撞，否则会直接因为下沉坠落
-{	
+{
+	//
+	if (ActiveHealthBar == nullptr && HealthBarWidgetClass != nullptr)
+	{
+		ActiveHealthBar = CreateWidget<USWorldUserWidget>(GetWorld(), HealthBarWidgetClass);
+		if (ActiveHealthBar)
+		{
+			ActiveHealthBar->AttachedActor = this;
+			ActiveHealthBar->AddToViewport();	
+		}
+	}
+
+
+	//
 	if (Delta < 0)
 	{
 		//Hit Feedback

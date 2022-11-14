@@ -4,11 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "SAttributeComponent.h"
+#include "SWorldUserWidget.h"
 #include "GameFramework/Character.h"
 #include "SAICharacter.generated.h"
 
 class USAttributeComponent;
 class UPawnSensingComponent;
+
 
 UCLASS()
 class ACTIONROGUELIKE_API ASAICharacter : public ACharacter
@@ -20,7 +22,11 @@ public:
 	ASAICharacter();
 
 protected:
-
+	USWorldUserWidget* ActiveHealthBar;
+	
+	UPROPERTY(EditDefaultsOnly, Category="UI")
+	TSubclassOf<UUserWidget> HealthBarWidgetClass;
+	
 	UPROPERTY(VisibleAnywhere)
 	USAttributeComponent* AttribComp;
 	UPROPERTY(VisibleAnywhere)
