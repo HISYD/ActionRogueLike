@@ -33,6 +33,11 @@ ASCharacter::ASCharacter()
 	//交互的comp
 	InteractionComp = CreateDefaultSubobject<USInteractionComponent>(TEXT("InteractionComp"));
 	AttributeComp   = CreateDefaultSubobject<USAttributeComponent>(TEXT("AttributeComp"));
+
+	//技能的Compo
+	ActionComp = CreateDefaultSubobject<USActionComponent>(TEXT("ActionComp"));
+	
+	
 }
 
 
@@ -73,8 +78,12 @@ void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	//PlayerInputComponent->BindAction("PrimaryInteract", IE_Pressed, this, &InteractionComp->PrimaryInteract);//错误的语句，只允许绑定角色自身的函数
 	PlayerInputComponent->BindAction("PrimaryInteract", IE_Pressed, this, &ASCharacter::PrimaryInteract);
 	PlayerInputComponent->BindAction("PrimaryDash", IE_Pressed, this, &ASCharacter::PrimaryDash);
-	
+
+	//Action
+	PlayerInputComponent->BindAction("Sprint", IE_Pressed, this, &ASCharacter::SprintStart);
+	PlayerInputComponent->BindAction("Sprint", IE_Released, this, &ASCharacter::SprintStop);
 }
+
 
 void ASCharacter::PostInitializeComponents()
 {
@@ -118,37 +127,7 @@ void ASCharacter::MoveRight(float value)
 
 void ASCharacter::PrimaryAttack()//攻击函数，播放攻击动画，并且计时，在正确时间点调用真正的攻击函数spawn魔法
 {
-	PlayAnimMontage(AttackAnim);//播放挥手动画，
-	GetWorldTimerManager().SetTimer(TimerHandle_PrimaryAttack, this, &ASCharacter::PrimaryAttack_TimeElapsed, 0.2f);//使用指定句柄计时，延迟0.2秒，等待手部动画运动到正确位置才后触发真攻击函数
-}
-void ASCharacter::PrimaryAttack_TimeElapsed()//真正的攻击函数，施放魔法
-{
-	FVector HandLocation = GetMesh()->GetSocketLocation("Muzzle_01");
-	
-	//FTransform SpawnTM = FTransform(GetControlRotation(), HandLocation);
-	
-	FActorSpawnParameters SpawnParams;
-	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;//自己f12进去看
-	SpawnParams.Instigator = this;//这些参数会送给spawn的对象，这样我们就可以在spawn的内容（攻击魔法）中访问释放者信息，后续教程是通过这种方式在蓝图里面做出释放者碰撞豁免
-
-	FRotator CameraRotator = CameraComp->GetComponentRotation();
-	FVector CameraBegin = CameraComp->GetComponentLocation();
-	FVector CameraEnd   = CameraBegin + 2000 * CameraRotator.Vector();
-	
-	FHitResult CameraHitResult;
-	GetWorld()->LineTraceSingleByChannel(CameraHitResult, CameraBegin, CameraEnd, ECollisionChannel::ECC_Camera);
-	FVector DesiredLocation = CameraHitResult.IsValidBlockingHit() ? CameraHitResult.Location : CameraEnd;
-	FRotator DesiredRotator = (DesiredLocation - HandLocation).Rotation();//妈的，求两个向量变换过去的欧拉角这么求，前面理解错了一直在用lookat
-	FTransform SpawnTM = FTransform(DesiredRotator, HandLocation);
-
-
-	//DrawDebugLine(GetWorld(), CameraBegin, DesiredLocation, FColor::Green, false, 2, 0, 2.0f);
-	//DrawDebugLine(GetWorld(), HandLocation, DesiredLocation, FColor::Blue, false, 2, 0, 2.0f);
-	
-	
-
-	
-	GetWorld()->SpawnActor<AActor>(ProjectileClass, SpawnTM, SpawnParams);//<AActor>(类，变换矩阵，参数),先打这个主函数，再根据需要的参数反推
+	ActionComp->StartActionByName(this, "PrimaryAttack");
 }
 
 void ASCharacter::PrimaryDash()
@@ -190,6 +169,16 @@ void ASCharacter::PrimaryInteract()
 	}
 }
 
+void ASCharacter::SprintStart()
+{
+	ActionComp->StartActionByName(this, "Sprint");
+}
+
+void ASCharacter::SprintStop()
+{
+	ActionComp->StopActionByName(this, "Sprint");
+}
+
 void ASCharacter::CheckIfDead(AActor* InstigatorActor, USAttributeComponent* OwningComp, float NewHealth, float Delta)
 {
 	if(NewHealth < 0.0f && Delta < 0.0f)
@@ -197,4 +186,9 @@ void ASCharacter::CheckIfDead(AActor* InstigatorActor, USAttributeComponent* Own
 		APlayerController* PC = Cast<APlayerController>(GetController());
 		DisableInput(PC);
 	}
+}
+
+void ASCharacter::HealSelf(float Amount)
+{
+	AttributeComp->UpdateHealth(Amount);
 }

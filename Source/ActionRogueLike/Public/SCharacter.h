@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "SActionComponent.h"
 #include "SAttributeComponent.h"
 #include "GameFramework/Character.h"
 #include "SCharacter.generated.h"
@@ -14,6 +15,7 @@ class USpringArmComponent;
 class USInteractionComponent;
 class UAnimMontage;
 class USAttributeComponent;
+class USActionComponent;
 
 UCLASS()
 class ACTIONROGUELIKE_API ASCharacter : public ACharacter
@@ -22,11 +24,10 @@ class ACTIONROGUELIKE_API ASCharacter : public ACharacter
 
 protected:
 	UPROPERTY(EditAnywhere, Category="Attack")
-	TSubclassOf<AActor> ProjectileClass;//[PrimaryAttack????]?????????????????????????class????actor??????????????????????????????????
-	//??????????UClass*,???????????????????????
+	TSubclassOf<AActor> ProjectileClass;
 
 	UPROPERTY(EditAnywhere, Category="Attack")
-	UAnimMontage* AttackAnim;//?????TSubclassOf<>??????????
+	UAnimMontage* AttackAnim;
 
 	UPROPERTY(EditAnywhere, Category="Dash")
 	TSubclassOf<AActor> DashProjectile;
@@ -54,9 +55,11 @@ protected:
 	UPROPERTY(VisibleAnywhere)
 	USInteractionComponent* InteractionComp;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
 	USAttributeComponent* AttributeComp;
-	
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
+	USActionComponent* ActionComp;
 	
 	void MoveForward(float value);
 	void MoveRight(float value);
@@ -65,8 +68,13 @@ protected:
 	void PrimaryDash();
 	void PrimaryDash_TimeElapsed();
 	void PrimaryInteract();
-	virtual void BeginPlay() override;
 
+	void SprintStart();
+	void SprintStop();
+
+
+	
+	virtual void BeginPlay() override;
 	virtual void PostInitializeComponents() override;
 
 	UFUNCTION()
@@ -74,8 +82,8 @@ protected:
 
 public:	
 	virtual void Tick(float DeltaTime) override;
-
-	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	UFUNCTION(Exec)//×÷±×ÂëÒ®£¡
+	void HealSelf(float Amount);
 };

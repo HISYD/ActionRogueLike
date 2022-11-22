@@ -9,22 +9,28 @@
 #include "SWorldUserWidget.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Blueprint/UserWidget.h"
+#include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Perception/PawnSensingComponent.h"
+
+static TAutoConsoleVariable<bool> CVarDrawDebug(TEXT("su.bDrawDebug"), true, TEXT(""), ECVF_Cheat);
 
 // Sets default values
 ASAICharacter::ASAICharacter()
 {
- 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	
 	AttribComp = CreateDefaultSubobject<USAttributeComponent>(TEXT("AttribComp"));
 	AttribComp->Health = 5;
 	SenseComp  = CreateDefaultSubobject<UPawnSensingComponent>(TEXT("SenseComp"));
-
-	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;//不加这个的话spawn的人物是没有ai的
+	
 	TimeToHitParamName = "TimeToHit";
 	
+	AutoPossessAI =  EAutoPossessAI::PlacedInWorldOrSpawned;//GameMode中Spawn的Pawn可以autoPossesAI
+
+	//设置Capsule无视碰撞，碰撞将发生在Mesh上，并且Mesh默认不会生成事件（碰撞双方都设置生成事件才能有效），必须要求设置为生成事件
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_WorldDynamic, ECR_Ignore);
+	GetMesh()->SetGenerateOverlapEvents(true);
 }
 
 
@@ -52,13 +58,19 @@ void ASAICharacter::PostInitializeComponents()
 
 void ASAICharacter::DoOnSeePawn(APawn* Pawn)
 {
+	bool bDrawDebug = CVarDrawDebug.GetValueOnGameThread();
+	
 	AAIController* AIController = Cast<AAIController>(GetController());
 	if (AIController)
 	{
 		UBlackboardComponent* BB = AIController->GetBlackboardComponent();
 		BB->SetValueAsObject("TargetActor", Pawn);
 
-		DrawDebugString(GetWorld(), GetActorLocation(), "PLAYER SPOTTED", nullptr, FColor::White, 4.0f, true);
+		if (bDrawDebug)
+		{
+			DrawDebugString(GetWorld(), GetActorLocation(), "PLAYER SPOTTED", nullptr, FColor::White, 4.0f, true);
+		}
+		
 	}
 }
 
@@ -93,6 +105,9 @@ void ASAICharacter::DoOnHealthChange(AActor* InstigatorActor, USAttributeCompone
 
 				GetMesh()->SetAllBodiesSimulatePhysics(true);
 				GetMesh()->SetCollisionProfileName("Ragdoll");//当然也可以直接在ProjectSetting里面改CharacterMesh的碰撞预设为Query&Physics,但是那样太浪费了。只需要运行时修改切换别的预设就好了
+				GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+				GetCharacterMovement()->DisableMovement();
+				
 				SetLifeSpan(10.0f);//十秒后销毁
 			}
 		}

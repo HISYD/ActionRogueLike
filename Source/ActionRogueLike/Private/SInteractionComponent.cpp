@@ -4,8 +4,7 @@
 #include "SInteractionComponent.h"
 
 #include "SGameplayInterface.h"
-#include "../../../Plugins/Developer/RiderLink/Source/RD/thirdparty/spdlog/include/spdlog/details/windows_include.h"
-
+#include "Camera\CameraComponent.h"
 #include "DrawDebugHelpers.h"
 
 // Sets default values for this component's properties
@@ -31,11 +30,12 @@ void USInteractionComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 void USInteractionComponent::PrimaryInteract()
 {
 	//配置参数
-	FVector EyeLocation;
-	FRotator EyeRotation;
 	AActor* MyOwner = GetOwner();
-	MyOwner->GetActorEyesViewPoint(EyeLocation, EyeRotation);
-	FVector EndLocation = EyeLocation+EyeRotation.Vector()*300;
+	UCameraComponent* CameraComp = Cast<UCameraComponent>(MyOwner->GetComponentByClass(UCameraComponent::StaticClass()));
+	FVector EyeLocation = CameraComp->GetComponentLocation();
+	FRotator EyeRotation = CameraComp->GetComponentRotation();
+
+	FVector EndLocation = EyeLocation+EyeRotation.Vector()*600;
 
 	//获取视线请求结果
 	FHitResult OnHitResult;

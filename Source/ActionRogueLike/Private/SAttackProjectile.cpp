@@ -5,6 +5,7 @@
 
 #include "DrawDebugHelpers.h"
 #include "SAttributeComponent.h"
+#include "SGameplayFunctionLibrary.h"
 #include "Components/SphereComponent.h"
 
 
@@ -20,10 +21,9 @@ void ASAttackProjectile::OnActorOverlap(UPrimitiveComponent* OverlappedComponent
 	if (OtherActor)
 	{
 		USAttributeComponent* AttributeComponent = Cast<USAttributeComponent>(OtherActor->GetComponentByClass(USAttributeComponent::StaticClass()));
-		if(ensure(AttributeComponent))
+		if (USGameplayFunctionLibrary::ApplyDirectionalDamage(GetInstigator(), OtherActor, -2, SweepResult))
 		{
-			AttributeComponent->UpdateHealth(-2);
-			Destroy();
+			Explode();
 		}
 	}
 }

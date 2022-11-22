@@ -50,6 +50,13 @@ protected:
 	UFUNCTION()
 	void DoOnQeuryFinish(UEnvQueryInstanceBlueprintWrapper* QueryInstance, EEnvQueryStatus::Type QueryStatus);
 
+	UFUNCTION()
+	void RespawnPlayerElapsed(AController* controller);
+
 public:
+
+	virtual void DoOnActorKilled(AActor* VictimActor);
+	
+
 	ASGameModeBase();
 };

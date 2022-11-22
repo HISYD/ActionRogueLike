@@ -28,7 +28,7 @@ ASProjectileBase::ASProjectileBase()
 	TrailEffect->SetupAttachment(RootComponent);
 	
 	MoveComp = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("MoveComp"));
-	MoveComp->InitialSpeed = 1500.0f;
+	MoveComp->InitialSpeed = 3000.0f;
 	MoveComp->ProjectileGravityScale = 0.0f;
 	MoveComp->bRotationFollowsVelocity = true;
 	MoveComp->bInitialVelocityInLocalSpace = true;

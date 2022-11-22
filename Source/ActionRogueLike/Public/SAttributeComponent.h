@@ -28,11 +28,6 @@ UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class ACTIONROGUELIKE_API USAttributeComponent : public UActorComponent
 {
 	GENERATED_BODY()
-
-protected:
-	
-	
-
 	
 public:	
 	// Sets default values for this component's properties
@@ -42,14 +37,18 @@ public:
 	float Health;
 	
 	UFUNCTION(BlueprintCallable)
-	void UpdateHealth(int delta);
+	bool UpdateHealth(int delta);
 	
 	UFUNCTION(BlueprintCallable)
 	bool IsAlive() const;
 	
 	UPROPERTY(BlueprintAssignable, Category="Attributes")
 	FOnHealthChanged OnHealthChanged;//具体的成员，UPROPERTY设置参考oncomponenthit
-	
+
+
+	static USAttributeComponent* GetAttribute(AActor* AActor);
+
+	AActor* InstigatorActor;
 protected:
 	
 };

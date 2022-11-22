@@ -7,6 +7,14 @@
 #include "AI/SAICharacter.h"
 #include "EnvironmentQuery/EnvQueryManager.h"
 #include "EngineUtils.h"
+#include "SCharacter.h"
+
+
+//Console Variable 示例
+static TAutoConsoleVariable<bool> CVarSpawnBots(TEXT("su.SpawnBots"), true, TEXT("Enable spawning of bots via timer"), ECVF_Cheat);
+static TAutoConsoleVariable<bool> CVarDrawDebug(TEXT("su.bDrawDebug"), true, TEXT(""), ECVF_Cheat);
+//su.可以帮助我们之后使用的时候快速定位所有su.开头的，类似于category
+
 
 ASGameModeBase::ASGameModeBase()
 {
@@ -22,6 +30,11 @@ void ASGameModeBase::StartPlay()
 
 void ASGameModeBase::SpawnTimeEplased()
 {
+	if (!CVarSpawnBots.GetValueOnGameThread())
+	{
+		return;
+	}
+	
 	UEnvQueryInstanceBlueprintWrapper* QueryInstance = UEnvQueryManager::RunEQSQuery(GetWorld(), SpawnBotQuery, this, EEnvQueryRunMode::Type::RandomBest5Pct, nullptr);
 
 	if (ensure(SpawnBotQuery))//保护避免因为没有从editor传入query时报错
@@ -67,6 +80,29 @@ void ASGameModeBase::DoOnQeuryFinish(UEnvQueryInstanceBlueprintWrapper* QueryIns
 	{
 		FActorSpawnParameters SpawnParameters;
 		AActor* SpawnedActor = GetWorld()->SpawnActor<AActor>(SpawnClass, Locations[0], FRotator::ZeroRotator);
+	}
+}
+
+void ASGameModeBase::RespawnPlayerElapsed(AController* Controller)
+{
+	if (ensure(Controller))
+	{
+		Controller->UnPossess();//之前Pawn死亡时disable了Controller的所有权。如果重启Player则INPUT无效。需要先清楚Controller的控制
+		
+		RestartPlayer(Controller);//要注意的是如果创建了些ui什么的试图从pawn里面读参数，那么新pawn的ui就会不动了捏
+	}
+}
+
+void ASGameModeBase::DoOnActorKilled(AActor* VictimActor)
+{
+	ASCharacter* Player = Cast<ASCharacter>(VictimActor);
+	if (Player)
+	{
+		FTimerHandle TimerHandle_RespawnDelay;//使用局部的，而非全局的属性，因此下次handle自动被刷新了
+		FTimerDelegate Delegate;
+		Delegate.BindUFunction(this, "RespawnPlayerElapsed", Player->GetController());//竟然tmd是用字符串名字绑定的吗//最后的是传入的参数
+		
+		GetWorldTimerManager().SetTimer(TimerHandle_RespawnDelay, Delegate, 2.0f, false);
 	}
 }
 
