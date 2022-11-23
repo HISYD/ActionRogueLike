@@ -72,7 +72,7 @@ protected:
 	void SprintStart();
 	void SprintStop();
 
-
+	
 	
 	virtual void BeginPlay() override;
 	virtual void PostInitializeComponents() override;
@@ -83,6 +83,8 @@ protected:
 public:	
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	
+	void PawnCameraShoot(FVector& CameraLocation, FVector& HitLocation);
 
 	UFUNCTION(Exec)//×÷±×ÂëÒ®£¡
 	void HealSelf(float Amount);

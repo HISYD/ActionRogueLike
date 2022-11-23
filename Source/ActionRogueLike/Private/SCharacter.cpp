@@ -179,6 +179,30 @@ void ASCharacter::SprintStop()
 	ActionComp->StopActionByName(this, "Sprint");
 }
 
+void ASCharacter::PawnCameraShoot(FVector& CameraLocation, FVector& HitLocation)
+{
+	FCollisionShape Shape;
+	Shape.SetSphere(20.0f);
+
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(this);
+		
+	FCollisionObjectQueryParams ObjParams;
+	ObjParams.AddObjectTypesToQuery(ECC_WorldDynamic);
+	ObjParams.AddObjectTypesToQuery(ECC_WorldStatic);
+	ObjParams.AddObjectTypesToQuery(ECC_Pawn);
+	
+	FRotator CameraRotator = CameraComp->GetComponentRotation();
+	CameraLocation = CameraComp->GetComponentLocation();
+	
+	FVector CameraEnd   = CameraLocation + 2000 * CameraRotator.Vector();
+	FHitResult CameraHitResult;
+	if (GetWorld()->SweepSingleByObjectType(CameraHitResult, CameraLocation, CameraEnd, FQuat::Identity, ObjParams, Shape, Params))
+	{
+		HitLocation = CameraHitResult.ImpactPoint;
+	}
+}
+
 void ASCharacter::CheckIfDead(AActor* InstigatorActor, USAttributeComponent* OwningComp, float NewHealth, float Delta)
 {
 	if(NewHealth < 0.0f && Delta < 0.0f)

@@ -2,6 +2,8 @@
 
 
 #include "SAction_ProjectileAttack.h"
+
+#include "SCharacter.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/Character.h"
 #include "Kismet/GameplayStatics.h"
@@ -40,41 +42,22 @@ void USAction_ProjectileAttack::AttackDelay_Elapsed(ACharacter* InstigatorCharac
 {
 	if (ensure(ProjectileClass))
 	{
+		FVector CameraLocation, HitLocation;
 		FVector HandLocation = InstigatorCharacter->GetMesh()->GetSocketLocation(HandSocketName);
-	
-		FActorSpawnParameters SpawnParams;
-		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;//自己f12进去看
-		SpawnParams.Instigator = InstigatorCharacter;//这些参数会送给spawn的对象，这样我们就可以在spawn的内容（攻击魔法）中访问释放者信息，后续教程是通过这种方式在蓝图里面做出释放者碰撞豁免
 
-		FCollisionShape Shape;
-		Shape.SetSphere(20.0f);
-
-		FCollisionQueryParams Params;
-		Params.AddIgnoredActor(InstigatorCharacter);
-		
-		FCollisionObjectQueryParams ObjParams;
-		ObjParams.AddObjectTypesToQuery(ECC_WorldDynamic);
-		ObjParams.AddObjectTypesToQuery(ECC_WorldStatic);
-		ObjParams.AddObjectTypesToQuery(ECC_Pawn);
-
-		UCameraComponent* CameraComp = Cast<UCameraComponent>(InstigatorCharacter->GetComponentByClass(UCameraComponent::StaticClass()));
-		FRotator CameraRotator = CameraComp->GetComponentRotation();
-		FVector CameraBegin = CameraComp->GetComponentLocation();
-		FVector CameraEnd   = CameraBegin + 2000 * CameraRotator.Vector();
-
-		FVector DesiredLocation;
-		FRotator DesiredRotation;
-		FHitResult CameraHitResult;
-		if (GetWorld()->SweepSingleByObjectType(CameraHitResult, CameraBegin, CameraEnd, FQuat::Identity, ObjParams, Shape, Params))
+		ASCharacter* SInstigatorCharacter = Cast<ASCharacter>(InstigatorCharacter);
+		if (SInstigatorCharacter)
 		{
-			DesiredLocation = CameraHitResult.ImpactPoint;
+			FActorSpawnParameters SpawnParams;
+			SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;//自己f12进去看
+			SpawnParams.Instigator = InstigatorCharacter;//这些参数会送给spawn的对象，这样我们就可以在spawn的内容（攻击魔法）中访问释放者信息，后续教程是通过这种方式在蓝图里面做出释放者碰撞豁免
+			
+			SInstigatorCharacter->PawnCameraShoot(CameraLocation, HitLocation);
+			FRotator const DesiredRotation = FRotationMatrix::MakeFromX(HitLocation - HandLocation).Rotator();
+			
+			FTransform const SpawnTM = FTransform(DesiredRotation, HandLocation);
+			GetWorld()->SpawnActor<AActor>(ProjectileClass, SpawnTM, SpawnParams);
 		}
-		DesiredRotation = FRotationMatrix::MakeFromX(DesiredLocation - HandLocation).Rotator();//妈的，求两个向量变换过去的欧拉角这么求，前面理解错了一直在用lookat
-
-		
-		FTransform SpawnTM = FTransform(DesiredRotation, HandLocation);
-		GetWorld()->SpawnActor<AActor>(ProjectileClass, SpawnTM, SpawnParams);
 	}
-
 	StopAction(InstigatorCharacter);
 }

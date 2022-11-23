@@ -3,12 +3,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameplayTagContainer.h"
 #include "SAction.h"
 #include "Components/ActorComponent.h"
 #include "SActionComponent.generated.h"
-
-class USAction;
-
 
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -20,7 +18,11 @@ class ACTIONROGUELIKE_API USActionComponent : public UActorComponent
 
 public:	
 	USActionComponent();
-	
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Tags")
+	FGameplayTagContainer ActiveGameplayTags;
+	//此处我们直接使用了struct而非指针，要求编译器必须知道对应的空间大小
+	 
 	UFUNCTION(BlueprintCallable, Category="Action")
 	void AddAction(TSubclassOf<USAction> ActionClass);
 
