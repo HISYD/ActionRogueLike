@@ -8,6 +8,9 @@
 #include "EnvironmentQuery/EnvQueryManager.h"
 #include "EngineUtils.h"
 #include "SCharacter.h"
+#include "SSaveGame.h"
+#include "GameFramework/SaveGame.h"
+#include "Kismet/GameplayStatics.h"
 
 
 //Console Variable 示例
@@ -19,6 +22,8 @@ static TAutoConsoleVariable<bool> CVarDrawDebug(TEXT("su.bDrawDebug"), true, TEX
 ASGameModeBase::ASGameModeBase()
 {
 	SpawnTimeInterval = 2.0f;
+
+	SlotName = "SaveGame01";
 }
 
 void ASGameModeBase::StartPlay()
@@ -103,6 +108,33 @@ void ASGameModeBase::DoOnActorKilled(AActor* VictimActor)
 		Delegate.BindUFunction(this, "RespawnPlayerElapsed", Player->GetController());//竟然tmd是用字符串名字绑定的吗//最后的是传入的参数
 		
 		GetWorldTimerManager().SetTimer(TimerHandle_RespawnDelay, Delegate, 2.0f, false);
+	}
+}
+
+void ASGameModeBase::InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage)
+{
+	Super::InitGame(MapName, Options, ErrorMessage);
+	LoadSaveGame();
+}
+
+void ASGameModeBase::WriteSaveGame()
+{
+	UGameplayStatics::SaveGameToSlot(CurrentSaveGame, SlotName, 0);
+}
+
+void ASGameModeBase::LoadSaveGame()
+{
+	if (UGameplayStatics::DoesSaveGameExist(SlotName, 0))
+	{
+		CurrentSaveGame = Cast<USSaveGame>(UGameplayStatics::LoadGameFromSlot(SlotName, 0));
+		if (CurrentSaveGame == nullptr)
+		{
+			return;	
+		}
+	}
+	else
+	{
+		CurrentSaveGame = Cast<USSaveGame>(UGameplayStatics::CreateSaveGameObject(USSaveGame::StaticClass()));
 	}
 }
 

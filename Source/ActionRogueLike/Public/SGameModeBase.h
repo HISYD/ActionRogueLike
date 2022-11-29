@@ -10,7 +10,7 @@
 
 class UEnvQuery;
 class UCurveFloat;
-
+class USSaveGame;
 
 /**
  * 
@@ -21,6 +21,11 @@ class ACTIONROGUELIKE_API ASGameModeBase : public AGameModeBase
 	GENERATED_BODY()
 
 protected:
+	//
+	FString SlotName;
+	
+	UPROPERTY()
+	USSaveGame* CurrentSaveGame;
 
 	//
 	FTimerHandle SpawnTimerHandle;
@@ -56,7 +61,14 @@ protected:
 public:
 
 	virtual void DoOnActorKilled(AActor* VictimActor);
-	
 
+	virtual void InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage) override;
+	
+	UFUNCTION(BlueprintCallable, Category="SaveGame")
+	void WriteSaveGame();
+
+	void LoadSaveGame();//不修饰为UFUNCTION,为了尽可能快
+	
+	
 	ASGameModeBase();
 };
